@@ -1,0 +1,342 @@
+---
+title: "Homework 1"
+author: "David (Yuandong) Sun"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+UCLA Stats 401
+
+Do not post your homework solutions online.
+
+# Reading
+
+- Chapter 5 from R for Data Science available at: http://r4ds.had.co.nz/transform.html
+- HSAUR Chapter 3 Simple Inference
+- ISwR Chapter 5 One and Two-sample test
+- ISwR Chapter 6.4 Correlation Tests
+- ISwR Chapter 8 Tabular Data
+
+
+# Exercise 1
+
+The data come from the following journal article, referenced by Samuels, et al. There were many treatments used, but for the purpose of this assignment, some of the treatments have been combined.
+
+Pappas, T., & Mitchell, C. A. (1985). Effects of seismic stress on the vegetative growth of Glycine max (L.) Merr. cv. Wells II. Plant, cell & environment, 8(2), 143-148.
+
+http://onlinelibrary.wiley.com/doi/10.1111/j.1365-3040.1985.tb01221.x/epdf
+
+A plant physiologist conducted an experiment to determine whether mechanical stress can slow the growth of soybean plants. Young plants were randomly allocated to two groups of 13 plants each. Plants in one group were mechanically agitated by shaking for 20 minutes twice daily, while plants in the other group were not agitated. After 16 days of growth, the total stem length (cm) of each plant was measured, with the results given in the accompanying table.
+
+```{r}
+ex1 <- read.csv('HW1Ex1.csv')
+head(ex1)
+```
+
+
+## Part 1
+
+Use a t-test to compare the treatments at alpha = 0.01. Let the alternative hypothesis be that stress tends to **slow growth.**
+
+
+H0: $\mu$_control - $\mu$_stress = 0
+
+Ha: $\mu$_control - $\mu$_stress > 0
+```{r}
+tapply(ex1$StemLength,ex1$Treatment,var)
+
+t.test(StemLength ~ Treatment, data = ex1,val.equal = F,alternative = "greater",conf.level = 0.99)
+
+```
+
+From the variance results, we see the variances are different and thus we use Welch two sample t-test. We get the P-value = 0.0005928 < 0.01, we reject H0 and conclude that there is sufficient evidence to support the stress tends to slow growth.
+
+## Part 2
+
+Construct a 95% confidence interval for the population mean reduction in stem length. 
+
+```{r}
+t.test(StemLength ~ Treatment, data = ex1,equal = F, alternative = "two.sided",conf.level = 0.95)
+```
+
+Answer:
+
+95% CI:  [1.240699, 4.390071]
+
+Does the confidence interval indicate whether the effect of stress is "horticulturally important," if "horticulturally important" is defined as a reduction in population mean stem length of at least 1 cm?
+
+Answer: The CI **indicates** the effect of stress is "horticulturally important" if it is defined as a reduction in population mean stem length of at least 1 cm, which is inclusive in the 95% CI. 
+
+Does the confidence interval indicate whether the effect of stress is "horticulturally important," if "horticulturally important" is defined as a reduction in population mean stem length of at least 5 cm?
+
+Answer: The CI **does not indicate** the effect of stress is "horticulturally important" if it is defined as a reduction in population mean stem length of at least 5 cm, since 5cm is not included in the 95% CI. 
+
+## Part 3
+
+Compare the treatments using a Wilcoxon-Mann-Whitney test at alpha = 0.01. Let the alternative hypothesis be that stress tends to **slow growth.**
+H0: $\mu$_control - $\mu$_stress = 0
+
+Ha: $\mu$_control - $\mu$_stress >0
+
+```{r}
+wilcox.test(StemLength~ Treatment, data = ex1,alternative = "greater",conf.level =0.99)
+```
+
+From the above test, we get P- value = 0.0005608 < 0.01, we reject H0 and thus conclude that there is sufficient evidence to support the stress tends to slow growth.
+
+# Exercise 2
+
+The data is based on the following journal article, referenced by Samuels, et al..
+
+Sargent, P. A., Sharpley, A. L., Williams, C., Goodall, E. M., & Cowen, P. J. (1997). 5-HT2C receptor activation decreases appetite and body weight in obese subjects. Psychopharmacology, 133, 309-312.
+
+https://www.researchgate.net/profile/Ann_Sharpley/publication/13869188_5-HT2C_activation_decreases_appetite_and_body_weight_in_obese_subjects/links/559275b908ae47a34910f4ba.pdf
+
+## Part 1
+
+During a weight loss study, each of nine female subjects was given 
+
+(1) the active drug m-chlorophenylpiperazine (mCPP) for two weeks and then a placebo for another two weeks, or 
+
+(2) the placebo for the first two weeks and then mCPP for the second two weeks.
+The data shows the amount of weight loss (kg) for the nine subjects when taking the drug mCPP and when taking a placebo. (Note that if a subject gained weight, then the recorded weight loss is negative, as is the case for subject 2 who gained 0.3 kg when on the placebo.) 
+
+Use a t-test to investigate the claim that mCPP affects weight loss. Let HA be nondirectional and let alpha = 0.01.
+
+H0: $\mu$_mcpp = $\mu$_placebo 
+
+Ha: $\mu$_mcpp $\ne$ $\mu$_placebo 
+```{r}
+ex2 <- read.csv('HW1Ex2Part1.csv')
+
+t.test(ex2$mCPP,ex2$Placebo, paired = TRUE, alternative = "two.sided",conf.level = 0.99)
+ 
+```
+From the aboved test result, we get P-value = 0.003121 < 0.05, we reject H0: $\mu$_mCPP is equal to $\mu$_Placebo, and thus conclude that there is no sufficient evidence to support mCPP **does not affect** weight loss.
+
+
+## Part 2
+
+The same study included a group of nine men. They were randomly assigned treatments in a similar way to the women in part 1. For each man two measurements were made: weight change when taking mCPP and weight change when taking the placebo.
+
+Analyze the data with a Wilcoxon signed-rank test at the alpha = 0.05 level; use a nondirectional alternative with alpha = 0.05
+
+H0: $\mu$_mcpp = $\mu$_placebo 
+
+Ha: $\mu$_mcpp $\ne$ $\mu$_placebo 
+
+```{r}
+ex2p2 <- read.csv('HW1Ex2Part2.csv')
+
+wilcox.test(ex2p2$mCPP,ex2p2$Placebo,paired= TRUE)
+
+```
+From the aboved test result, we get p- value = 0.4258 > 0.05, we accept H0:$\mu$_mCPP is equal to $\mu$_Placebo, and thus conclude that there is sufficient evidence to support mCPP does not affect weight loss
+ 
+# Exercise 3
+
+The data is based on the following journal article, referenced by Samuels, et al. 
+
+Ware, J. H. (1989). Investigating therapies of potentially great benefit: ECMO. Statistical Science, 298-306.
+
+http://www.jstor.org/stable/2245829?seq=1#page_scan_tab_contents
+
+Extracorporeal membrane oxygenation (ECMO) is a procedure that is used to treat newborn babies who suffer from severe respiratory failure. An experiment was conducted in which 29 babies were treated with ECMO and 10 babies were treated with conventional medical therapy (CMT). The outcomes of this study are shown here 
+
+```{r}
+ex3 <- data.frame(
+  outcome = c(rep('Die',4), rep('Live',6), rep('Die',1), rep('Live',28)),
+  treatment = c(rep('CMT',10), rep('ECMO',29))
+)
+addmargins(table(ex3))
+```
+
+## Part 1
+
+Why is the chi-squared test not appropriate for this study?
+
+Answer: Because some counts of cells are below 5, the assumptions regarding the 
+Chi-squared distribution may not be true.
+
+## Part 2
+
+Perform a randomization test (with at least 5000 randomizations) to test if ECMO is more effective at saving the lives of newborn babies with respiratory failure.
+
+H0: $\mu$_ECMO = $\mu$_CMT
+
+Ha: $\mu$_ECMO $\gt$ $\mu$_CMT
+```{r}
+record<-ex3$outcome
+record_convert <- ifelse(record=="Live",T,F)
+
+cmt <- record_convert[1:10]
+mean(cmt)
+
+ecmo <- record_convert[11:39]
+mean(ecmo)
+
+obs_dif <- mean(ecmo)-mean(cmt)
+obs_dif
+
+#randomization
+set.seed(1)
+group_mean_diff<-rep(NA,5000)
+for(i in 1:5000){
+  randomized <-sample(record_convert)
+  group_cmt <-randomized[1:10]
+  group_ecmo <- randomized[11:39]
+  group_mean_diff[i] <- mean(group_ecmo)-mean(group_cmt)
+}
+summary(group_mean_diff)
+mean(group_mean_diff>=obs_dif)
+```
+
+From the above test result, we get the empirical p-value 0.0096< 0.05, so reject H0 and conclude that there is sufficient evidence to support Ha that ECMO is more effective at saving the lives of newborn babies with respiratory failure.
+
+## Part 3
+
+Use Fisher's exact test to test if ECMO is more effective at saving the lives of newborn babies with respiratory failure. Use alpha = 0.05.
+
+H0: $\mu$_ECMO = $\mu$_CMT
+
+Ha: $\mu$_ECMO $\gt$ $\mu$_CMT
+```{r}
+fisher.test(table(ex3),alt = "greater")
+```
+
+From the above test result, we get p-value = 0.01102 < 0.05, thus there is sufficient evidence to reject H0 and conclude that there is sufficient evidence to support Ha that ECMO is more effective at saving the lives of newborn babies with respiratory failure.
+
+
+# Exercise 4
+
+The data is based on the following journal article, referenced by Samuels, et al. 
+
+Johnson, S. K., & Johnson, R. E. (1972). Tonsillectomy history in Hodgkin's disease. New England Journal of Medicine, 287(22), 1122-1125.
+
+http://www.nejm.org/doi/full/10.1056/NEJM197211302872205#t=articleTop
+
+A study of 85 patients with Hodgkin's disease found that 41 had had their tonsils removed. Each patient was matched with a sibling of the same sex. Only 33 of the siblings had undergone tonsillectomy. The data are shown in the following table.
+ 
+```{r}
+ex4 <- data.frame(
+  hodkins = c(rep('yes',26), rep('no',7), rep('yes',15), rep('no',37)),
+  sibling = c(rep('yes',33), rep('no',52))
+)
+table(ex4)
+```
+ 
+Use McNemar's test to test the hypothesis that "yes/no" and "no/yes" pairs are equally likely. Previous research had suggested that having a tonsillectomy is associated with an **increased** risk of Hodgkin's disease; thus, use a directional alternative. Let a = 0.05
+
+H0: P_"yes/no" = P_"no/yes" 
+
+Ha: P_"yes/no" $\gt$ P_"no/yes" 
+```{r}
+mcnemar.test(table(ex4),correct = F)
+tst<-mcnemar.test(table(ex4),correct = F)
+tst$p.value/2
+```
+From the above test result, we get p-value= 0.08808, but since it is directional, the p-value should be divided by 2, which is 0.04404 < 0.05. we do not accept H0：P_"yes/no" = P_"no/yes" . There is sufficient evidence to support having a tonsillectomy is associated with an increased risk of Hodgkin's disease.
+
+# Exercise 5 - dplyr
+
+These exercises are taken from Wickham's R for Data Science book chapter 5.
+The data comes from the package `library(nycflights13)`
+
+```{r, error = TRUE}
+# install.packages('nycflights13') 
+ex5<-library(nycflights13)
+library(dplyr)
+```
+
+
+### From section 5.2.4 
+
+#### 1:
+
+Find all flights that
+
+```{r}
+# - Had an arrival delay of two or more hours
+flights %>% 
+    filter(arr_delay >=120)
+
+# - Flew to Houston (IAH or HOU)
+flights %>% 
+    filter(dest == "IAH" | dest == "HOU")
+
+# - Were operated by United, American, or Delta
+flights %>% 
+    filter(carrier == "UA" |carrier == "AA"|carrier == "DL")
+
+# - Departed in summer (July, August, and September)
+flights %>% 
+    filter(month %in% c(7,8,9))
+
+# - Arrived more than two hours late, but didn't leave late
+flights %>%   
+    filter(arr_delay>=120,dep_delay <=0 )
+
+# - Were delayed by at least an hour, but made up over 30 minutes in flight
+flights %>%
+  filter(dep_delay>=60,(dep_delay- arr_delay)>30 )
+
+# - Departed between midnight and 6am (inclusive)
+flights %>%
+  filter((dep_time >=001 & dep_time <=600) | dep_time ==2400)
+
+```
+
+
+
+### From section 5.5.2 
+
+#### 1
+
+Currently dep_time and sched_dep_time are convenient to look at, but hard to compute with because they're not really continuous numbers. Convert them to a more convenient representation of number of minutes since midnight.
+
+```{r}
+flights_n<-flights
+flights_n$dep_time <- ifelse(flights_n$dep_time==2400,0,flights_n$dep_time)
+flights_n$sched_dep_time<- ifelse(flights_n$sched_dep_time==2400,0,flights_n$sched_dep_time)
+
+flights_n%>%
+  mutate(dep_time = (dep_time %/% 100 *60 + dep_time %%100), sched_dep_time = (sched_dep_time %/% 100 *60 + sched_dep_time %%100))
+
+```
+
+### From section 5.6.7
+
+#### 4
+
+Look at the number of cancelled flights per day. Is there a pattern? Is the proportion of cancelled flights related to the average delay?
+
+```{r}
+library(ggplot2)
+flights %>%
+  mutate(date = as.Date(paste(year, month, day, sep='-')))%>%
+  group_by(date)%>%
+  summarise(num_cancel=sum(is.na(arr_delay)),n=n(),avg_dep_delay = mean(dep_delay, na.rm=TRUE),avg_arr_delay = mean(arr_delay, na.rm=TRUE)) %>% 
+  ggplot(mapping = aes(x=avg_dep_delay, y = (num_cancel/n)))+geom_point()+geom_smooth(se=FALSE)+labs(x= "Avg Dep Delay",y= "number cancelled proportion")
+
+```
+
+It seems like there is a positive correlation between average depart delay and number canceled proportion per day. The higher average depart delay is, the higher number canceled proportion per day.
+
+#### 5
+
+Which carrier has the worst delays? (ignore the challenge section)
+
+
+```{r}
+flights %>%
+  group_by(carrier)%>%
+  summarise(n=n(),avg_dep_delay = mean(dep_delay, na.rm=TRUE),avg_arr_delay = mean(arr_delay, na.rm=TRUE))%>%
+  arrange(desc(avg_dep_delay))
+```
+
+Answer: F9 has the worst average departure delay and average arrival delay. 
+
+
