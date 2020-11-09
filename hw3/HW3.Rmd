@@ -127,7 +127,7 @@ However, the variables `displacement`, `horsepower`, and `weight` seem to have v
 
 The variable origin is categorical (not ordinal), so if we want to include them we have to make dummy variables.
 
-I will begin by exploring the replationship between `horsepower` and `mpg`. 
+I will begin by exploring the relationship between `horsepower` and `mpg`. 
 
 ```{r}
 plot(mpg ~ horsepower, data = Auto, cex = 0.5)
@@ -189,9 +189,9 @@ summary(gam_fit)
 plot(gam_fit, se = TRUE)
 ```
 
-The summary of the fitted GAM model indicates that both variables have a significant relationship with `mpg`.
+he summary of the fitted GAM model indicates that both variables have a significant relationship with `mpg`.
 
-Inspection of the plots, however, seems to show that perhaps the relationship between `weight` and `mpg` becomes linear if we have already included `horsepower` in the model. We can check this by fitting another gam where `weight` is added as a linear variable.
+Inspection of the plots, however, seems to show that perhaps the relationship between `weight` and `mpg` becomes linear if we have already included `horsepower` in the Tmodel. We can check this by fitting another gam where `weight` is added as a linear variable.
 
 
 ```{r, error = TRUE}
@@ -208,6 +208,62 @@ Your resulting model does not need to be perfect, and I do not want you to stres
 
 Check the example in chapter 7 of ISLR - pages 294-297 for guidance.
 
+
+#I will explore 'displacement' and 'acceleration'
+
+#displacement:
+
+```{r, error = T}
+plot(mpg ~ displacement, data = Auto, cex =0.5)
+```
+The above plot shows the relationship is clearly not linear. We may choose to explore a polynomial relationship or may consider using splines.
+
+
+I used fitting GAMs - a quadratic (poly 2) function, and splines with 2, 4, and 6 degrees of freedom. The choice of degrees of freedom is arbitrary.
+```{r, error = T}
+  poly2_fit <-gam(mpg~ poly(displacement,2),data = Auto)
+  spline2_fit <-gam(mpg ~s(displacement,df=2), data = Auto)
+  spline4_fit <-gam(mpg ~ s(displacement, df = 4),data = Auto)
+  spline6_fit <-gam(mpg ~ s(displacement, df = 6),data = Auto)
+  anova(poly2_fit,spline2_fit, spline4_fit,spline6_fit)
+  #From the ANOVA result, we can see a spline with df = 4 is the fit we should use 
+  
+  plot(spline4_fit, se = TRUE)
+```
+
+```{r, error = TRUE}
+  gam_fit3 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(displacement, 2), data = Auto)
+  summary(gam_fit3)
+  plot(gam_fit3, se = TRUE)
+```
+
+The summary of the fitted GAM model 3 indicates that 'horsepower' and 'displacement' variables have a significant relationship with `mpg`, but 'weight' variable does not have a significant relationship with 'mpg'.
+
+#acceleration
+```{r, error = T}
+plot(mpg ~ acceleration, data = Auto, cex =0.5)
+```
+
+The above plot shows the relationship is clearly not linear. We may choose to explore a polynomial relationship or may consider using splines.
+
+I used fitting GAMs - a quadratic (poly 2) function, and splines with 2, 4, and 6 degrees of freedom. The choice of degrees of freedom is arbitrary.
+```{r, error = T}
+  poly2_fit <-gam(mpg~ poly(acceleration,2),data = Auto)
+  spline2_fit <-gam(mpg ~s(acceleration,df=2), data = Auto)
+  spline4_fit <-gam(mpg ~ s(acceleration, df = 4),data = Auto)
+  spline6_fit <-gam(mpg ~ s(acceleration, df = 6),data = Auto)
+  anova(poly2_fit,spline2_fit, spline4_fit,spline6_fit)
+  # From the ANOVA result, we can see a spline with df = 2 is the fit we should use 
+  plot(spline2_fit, se = TRUE)
+```
+
+```{r, error = TRUE}
+  gam_fit4 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) + s(displacement, 2)+s(acceleration,2), data = Auto)
+  summary(gam_fit4)
+  plot(gam_fit4, se = TRUE)
+```
+
+The summary of the fitted GAM model 4 indicates that 'horsepower' and 'displacement' variables have a significant relationship with `mpg`, but 'weight' and 'acceleration' variables do not have a significant relationship with 'mpg'.
 
 # 3) Naive Bayes Classifier for Iris data
 
