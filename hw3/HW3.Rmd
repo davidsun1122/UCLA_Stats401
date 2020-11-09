@@ -25,7 +25,7 @@ A cubic basis spline allows us to fit a series of cubic functions in a way that 
 
 It is similar to least-squares polynomial regression in the way it selects coefficients -- that is, it tries to minimize the total sum of squares of residuals. The difference is that the basis spline will have knots. 
 
-Follow the instructions outlined below to create a cubic basis spline with two knots manually. In a real-world seting, I do not recommend manual creation of basis splines. I recommend using R's spline functions.
+Follow the instructions outlined below to create a cubic basis spline with two knots manually. In a real-world setting, I do not recommend manual creation of basis splines. I recommend using R's spline functions.
 
 ```{r, error = TRUE}
 # Here is our data. We will pretend y is the height of a person, and x is his age.
@@ -60,24 +60,28 @@ x_a <- (x - 15) ^ 3   # the cubic function that begins at xi = 15
 x_a[ x_a < 0 ] <- 0   # we force all the values below 15 (x_a is negative) to be 0
 
 ## create another vector of x for the knot at x=20
-
+x_b <- (x - 20)^3
+x_b[x_b<0]<-0
 
 ## fit a least squares regression model on all of your x vectors
-basis_fit <- # .. 
+basis_fit <- lm(y ~ x + x_2 +x_3 + x_a + x_b)
+
 
 
 ## Plot your fitted spline
 s <- seq(2,70)  # vector of x values to plot
 hs_a <- (s-15)^3 # must make a vector of values to plot for x_a
 hs_a[s<15] <- 0
-hs_b <- # ...
-yhat <- # ...
+hs_b <- (s-20)^3
+hs_b[s<20]<-0
+basis_fit_cf <- basis_fit$coefficients
+yhat_bf <- basis_fit_cf[1] + basis_fit_cf[2]*s +basis_fit_cf[3]*s^2+basis_fit_cf[4]*s^3+basis_fit_cf[5]*hs_a+basis_fit_cf[6]*hs_b
 plot(x, y, ylim = range(yhat), main = "Manual Cubic Basis Spline Fit")
 lines(s, yhat, type = "l", lwd = 2, col = "blue")
 
 # what is your predicted value when x = 50?
-
-
+x_t <- 50
+predict(basis_fit, newdata=data.frame(x=x_t, x_2 =x_t^2, x_3 = x_t^3, x_a = (x_t-15)^3, x_b = (x_t-20)^3))
 
 ## Compare results to using R's built-in basis spline function bs() in library(gam)
 library(gam)
@@ -88,6 +92,8 @@ plot(x, y, ylim = range(yhat), main = "Cubic Basis Spline Fit")
 lines(s, yhat, type = "l", lwd = 2, col = "blue")
 
 # what is your predicted value when x = 50?
+predict(bs_fit, newdata=data.frame(x=50))
+
 
 ```
 
