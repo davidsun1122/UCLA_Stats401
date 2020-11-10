@@ -189,7 +189,7 @@ summary(gam_fit)
 plot(gam_fit, se = TRUE)
 ```
 
-he summary of the fitted GAM model indicates that both variables have a significant relationship with `mpg`.
+The summary of the fitted GAM model indicates that both variables have a significant relationship with `mpg`.
 
 Inspection of the plots, however, seems to show that perhaps the relationship between `weight` and `mpg` becomes linear if we have already included `horsepower` in the Tmodel. We can check this by fitting another gam where `weight` is added as a linear variable.
 
@@ -209,7 +209,7 @@ Your resulting model does not need to be perfect, and I do not want you to stres
 Check the example in chapter 7 of ISLR - pages 294-297 for guidance.
 
 
-#I will explore 'displacement' and 'acceleration'
+#I will explore `displacement` and `acceleration`
 
 #displacement:
 
@@ -232,13 +232,12 @@ I used fitting GAMs - a quadratic (poly 2) function, and splines with 2, 4, and 
 ```
 
 ```{r, error = TRUE}
-  gam_fit3 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(displacement, 2), data = Auto)
+  gam_fit3 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(displacement, 4), data = Auto)
   summary(gam_fit3)
   plot(gam_fit3, se = TRUE)
-  
 ```
 
-The summary of the fitted GAM model 3 indicates that `horsepower` and `displacement` variables have a significant relationship with `mpg`, but `weight` variable does not have a significant relationship with 'mpg'.
+The summary of the fitted GAM model 3 indicates that `horsepower` and `weight` variables have a significant relationship with `mpg`. `displacement` variable does not have a significant relationship with `mpg`, thus I will not include in the model 
 
 #acceleration
 ```{r, error = T}
@@ -247,7 +246,9 @@ plot(mpg ~ acceleration, data = Auto, cex =0.5)
 
 The above plot shows the relationship is clearly not linear. We may choose to explore a polynomial relationship or may consider using splines.
 
+
 I used fitting GAMs - a quadratic (poly 2) function, and splines with 2, 4, and 6 degrees of freedom. The choice of degrees of freedom is arbitrary.
+
 ```{r, error = T}
   poly2_fit <-gam(mpg~ poly(acceleration,2),data = Auto)
   spline2_fit <-gam(mpg ~s(acceleration,df=2), data = Auto)
@@ -259,24 +260,36 @@ I used fitting GAMs - a quadratic (poly 2) function, and splines with 2, 4, and 
 ```
 
 ```{r, error = TRUE}
-  gam_fit4 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) + s(displacement, 2)+s(acceleration,2), data = Auto)
-  summary(gam_fit4)
-  plot(gam_fit4, se = TRUE)
+#  gam_fit4 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) + s(displacement, 4)+s(acceleration,2), data = Auto)
+#  summary(gam_fit4)
+#  plot(gam_fit4, se = TRUE)
+  gam_fit4 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(acceleration,2), data = Auto)
+  summary(gam_fit4_a)
+  plot(gam_fit4_a, se = TRUE)
 ```
 
-Inspection of the plots, however, seems to show that perhaps the relationship between `acceleration` and `mpg` becomes linear if we have already included `horsepower`,`weight` and `displacement` in the Tmodel. We can check this by fitting another gam where `weight` is added as a linear variable.
+
+Inspection of the plots, however, seems to show that perhaps the relationship between `acceleration` and `mpg` becomes linear if we have already included `weight` and `displacement` in the Tmodel. We can check this by fitting another gam where `acceleration` is added as a linear variable.
 
 
 ```{r, error = TRUE}
-  gam_fit5 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) + s(displacement, 2)+acceleration, data = Auto)
+#  gam_fit5 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) + s(displacement, 4)+acceleration, data = Auto)
+#  summary(gam_fit5)
+  gam_fit5_a <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +acceleration, data = Auto)
+  summary(gam_fit5_a)
   plot(gam_fit5, se = TRUE)
-  anova(gam_fit5, gam_fit4)
+  anova(gam_fit5_a, gam_fit4)
 ```
 
-From the above ANOVA table : `gam_fit5` uses a linear fit for acceleration and `gam_fit4` uses a spline fit for acceleration. The resulting p-value gives 0.2135. This is large enough for us to  conclude that the relationship between acceleration and mpg is better modeled as a linear relationship.
+From the above ANOVA table : `gam_fit5` uses a linear fit for acceleration and `gam_fit4` uses a spline fit for acceleration. The resulting p-value gives 0.1698. This is large enough for us to conclude that the relationship between acceleration and mpg is better modeled as a linear relationship.
 
-The ANOVA table compares the two models: `gam_fit2` uses a linear fit for weight and `gam_fit` uses a spline fit for weight. Comparing these two models  provides a p-value of 0.0201. While this is not as extreme as a value on the order of 10^-16, it is still a small value, and we will conclude that the relationship between weight and mpg is better modeled as a non-linear relationship.
+Our final result is :
 
+```{r,error= TRUE}
+  gam_fit5_a <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +acceleration, data = Auto)
+  summary(gam_fit5_a)
+  plot(gam_fit5, se = TRUE)
+```
 
 
 
