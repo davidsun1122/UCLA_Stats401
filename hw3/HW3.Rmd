@@ -346,7 +346,8 @@ iris_nb <- function(test, trainx, trainy){
   # trainx, which will be the data.frame of the training data x values
   # trainy, which will be the class labels of the training data
   test <- as.matrix(test) # this converts the test case from a data.frame to a matrix
-
+  Species<-trainy
+  train <- cbind(data.frame(trainx), Species)
   # Using the training data, calculate the mean and standard 
   # deviation for each variable for each class of flower.
   # There will be a total of 24 summary values, that will be used to calculate the 
@@ -354,21 +355,23 @@ iris_nb <- function(test, trainx, trainy){
   
   # one way is to manually calculate each of these values...
   # mean sepal length of class setosa
-  m_sep_l_set <- mean(train$Sepal.Length[train$Species == "setosa"])  
+  #m_sep_l_set <- mean(train$Sepal.Length[train$Species == "setosa"])  
   # sd sepal length of class setosa
-  s_sep_l_set <- sd(train$Sepal.Length[train$Species == "setosa"])
+  #s_sep_l_set <- sd(train$Sepal.Length[train$Species == "setosa"])
   # ...
   
   # another way uses dplyr. Either method works.
-  summary <- train %>% group_by(Species) %>% 
-    summarise(msl = mean(Sepal.Length), ssl = sd(Sepal.Length))
-  
-  # Also, calculate the relative frequency of each species in the training data
-  # these will serve as the 'prior' probabilities of each class
-  pr_set <- # proportion of class setosa in the training data
-  pr_ver
-  pr_vir
-    
+  summary <- train %>% group_by(Species) %>%
+    summarise(msl = mean(Sepal.Length), ssl = sd(Sepal.Length),
+              msw = mean(Sepal.Width), ssw = sd(Sepal.Width),
+              mpl = mean(Petal.Length), spl = sd(Petal.Width),
+              mpw = mean(Petal.Width), spw = sd(Petal.Width))
+   
+  # # Also, calculate the relative frequency of each species in the training data
+  # # these will serve as the 'prior' probabilities of each class
+   pr_set <- sum(train$Species=="setosa")/nrow(train)# proportion of class setosa in the training data
+   pr_ver <- sum(train$Species=="versicolor")/nrow(train)
+   pr_vir <- sum(train$Species=="virginica")/nrow(train)
   # Now that we have the summary statistics, we can calculate the numerator 
   # for each class.
   # This will be the product of the likelihoods of each variable.
@@ -380,15 +383,27 @@ iris_nb <- function(test, trainx, trainy){
   # Numerator for the Setosa Class
   # test[1] corresponds to the first value in the test vector: the sepal length
   # dnorm(test[1], mu_sl_set, sd_sl_set) is the probability of observing that 
-  # test[1] value based on the summary stats we found for class Setosa's Sepal Length.
-  num_set <- dnorm(test[1], m_sep_l_set, s_sep_l_set) *
-             dnorm(test[2], ...) * 
-             dnorm(test[3], ...) * 
-             dnorm(test[4], ...) *
+  #test[1] value based on the summary stats we found for class Setosa's Sepal Length.
+   num_set <- dnorm(test[1], summary[1,2,2], summary[1,3,2]) *
+             dnorm(test[2], summary[1,4,2], summary[1,5,2]) *
+             dnorm(test[3], summary[1,6,2], summary[1,7,2]) *
+             dnorm(test[4], summary[1,8,2], summary[1,9,2]) *
              pr_set
-  # repeat for the other classes ...
-  
-  
+
+
+  # class Versicolor
+   num_ver <- dnorm(test[1], summary[2,2,2], summary[2,3,2]) *
+             dnorm(test[2], summary[2,4,2], summary[2,5,2]) *
+             dnorm(test[3], summary[2,6,2], summary[2,7,2]) *
+             dnorm(test[4], summary[2,8,2], summary[2,9,2]) *
+             pr_ver
+  #class Virginica
+   num_vir <- dnorm(test[1], summary[3,2,2], summary[3,3,2]) *
+             dnorm(test[2], summary[3,4,2], summary[3,5,2]) *
+             dnorm(test[3], summary[3,6,2], summary[3,7,2]) *
+             dnorm(test[4], summary[3,8,2], summary[3,9,2]) *
+             pr_vir
+
   # The denominator will be the sum of the three numerator values
   denom <- sum(num_set, num_ver, num_vir)
   
@@ -397,7 +412,7 @@ iris_nb <- function(test, trainx, trainy){
     Versicolor = num_ver / denom, 
     Virginica = num_vir / denom), 6)
   
-  return(results) # what the function outputs
+  return(summary) # what the function outputs
 }
 
 ```
@@ -413,7 +428,7 @@ iris_nb <- function(test, trainx, trainy){
 
 #### Testing it out
 
-```{r, error = TRUE}
+```{r, error = TRUE, warning=FALSE}
 set.seed(1)
 training_rows <- sort(c(sample(1:50, 40), sample(51:100, 40), sample(101:150, 40)))
 training_x <- as.matrix(iris[training_rows, 1:4])
@@ -425,10 +440,13 @@ test_case_b <- as.matrix(iris[73, 1:4]) # true class versicolor
 test_case_c <- as.matrix(iris[124, 1:4]) # true class virginica
 
 # class predictions of test cases
-iris_nb(test_case_a, training_x, training_y)
+s<-iris_nb(test_case_a, training_x, training_y)
 iris_nb(test_case_b, training_x, training_y)
 iris_nb(test_case_c, training_x, training_y)
+
+s[1,2,2]
 ```
+
 
 ```{r, error = TRUE}
 # should work and produce slightly different estimates based on new training data
@@ -446,7 +464,7 @@ iris_nb(test_case_c, training_x2, training_y2)
 
 While instructive and education (I hope) to write your own NaiveBayes function, in practical settings, I recommend using the production ready code from some time-tested packages.
 
-I've included some code for using the `naiveBayes()` function that is part of the `e1071` package. No need to modify anything. The results prediced by `naiveBayes()` should match the results from the function you wrote.
+I've included some code for using the `naiveBayes()` function that is part of the `e1071` package. No need to modify anything. The results predicted by `naiveBayes()` should match the results from the function you wrote.
 
 ```{r}
 # code provided. no need to edit. These results should match your results above.
