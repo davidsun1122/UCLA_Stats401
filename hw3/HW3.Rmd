@@ -237,9 +237,9 @@ I used fitting GAMs - a quadratic (poly 2) function, and splines with 2, 4, and 
   plot(gam_fit3, se = TRUE)
 ```
 
-The summary of the fitted GAM model 3 indicates that `horsepower` and `weight` variables have a significant relationship with `mpg`. `displacement` variable does not have a significant relationship with `mpg`, thus I will not include in the model 
+The summary of the fitted GAM model 3 indicates that `horsepower` and `weight` variables have a significant relationship with `mpg`.We can see `displacement` variable does not have a significant relationship with `mpg`, but we will keep it for now and compare at the end.  
 
-#acceleration
+#Then let us continue with acceleration
 ```{r, error = T}
 plot(mpg ~ acceleration, data = Auto, cex =0.5)
 ```
@@ -260,38 +260,40 @@ I used fitting GAMs - a quadratic (poly 2) function, and splines with 2, 4, and 
 ```
 
 ```{r, error = TRUE}
-#  gam_fit4 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) + s(displacement, 4)+s(acceleration,2), data = Auto)
-#  summary(gam_fit4)
-#  plot(gam_fit4, se = TRUE)
-  gam_fit4 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(acceleration,2), data = Auto)
-  summary(gam_fit4_a)
-  plot(gam_fit4_a, se = TRUE)
+  gam_fit4 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) + s(displacement, 4) +s(acceleration,2), data = Auto)
+  summary(gam_fit4)
+  plot(gam_fit4, se = TRUE)
 ```
 
 
-Inspection of the plots, however, seems to show that perhaps the relationship between `acceleration` and `mpg` becomes linear if we have already included `weight` and `displacement` in the Tmodel. We can check this by fitting another gam where `acceleration` is added as a linear variable.
+Inspection of the plots, it seems to show that perhaps the relationship between `acceleration` and `mpg` becomes linear if we have already included `horsepower`, `weight` and `displacement` in the Tmodel. We can check this by fitting another gam where `acceleration` is added as a linear variable.
 
 
 ```{r, error = TRUE}
-#  gam_fit5 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) + s(displacement, 4)+acceleration, data = Auto)
-#  summary(gam_fit5)
-  gam_fit5_a <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +acceleration, data = Auto)
+  gam_fit5_a <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(displacement, 4)+acceleration, data = Auto)
   summary(gam_fit5_a)
   plot(gam_fit5, se = TRUE)
   anova(gam_fit5_a, gam_fit4)
 ```
 
-From the above ANOVA table : `gam_fit5` uses a linear fit for acceleration and `gam_fit4` uses a spline fit for acceleration. The resulting p-value gives 0.1698. This is large enough for us to conclude that the relationship between acceleration and mpg is better modeled as a linear relationship.
+From the above ANOVA table : `gam_fit5_a` uses a linear fit for acceleration and `gam_fit4` uses a spline fit for acceleration. The resulting p-value gives 0.3114. This is large enough for us to conclude that the relationship between acceleration and mpg is better modeled as a linear relationship.
 
-Our final result is :
+The we compare the models of include or exclude `displacment` variable
 
 ```{r,error= TRUE}
-  gam_fit5_a <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +acceleration, data = Auto)
-  summary(gam_fit5_a)
-  plot(gam_fit5, se = TRUE)
+  gam_fit5_b <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +acceleration, data = Auto) # gam_fit5_b model excludes `displacement`
+  summary(gam_fit5_b)
+  plot(gam_fit5_b, se = TRUE)
+  anova(gam_fit5_b, gam_fit5_a)
 ```
 
+From the above ANOVA result, we have very small p-value on gam_fit5_b, thus we will keep `displacement` variable in our model. 
 
+Our final model is :
+
+```{r, error= TRUE}
+
+```
 
 # 3) Naive Bayes Classifier for Iris data
 
