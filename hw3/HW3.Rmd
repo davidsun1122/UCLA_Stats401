@@ -235,9 +235,10 @@ I used fitting GAMs - a quadratic (poly 2) function, and splines with 2, 4, and 
   gam_fit3 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(displacement, 4), data = Auto)
   summary(gam_fit3)
   plot(gam_fit3, se = TRUE)
+  anova(gam_fit,gam_fit3)
 ```
 
-The summary of the fitted GAM model 3 indicates that `horsepower` and `weight` variables have a significant relationship with `mpg`.We can see `displacement` variable does not have a significant relationship with `mpg`, but we will keep it for now and compare at the end.  
+The summary of the fitted GAM model 3 indicates that `horsepower` and `weight` variables have a significant relationship with `mpg`.We can see `displacement` variable does not have a significant relationship with `mpg` in summary of (gam_fit3), but we compared 2 models under ANOVA with small p-value, and thus we include `displacement` variable in our model.
 
 #Then let us continue with acceleration
 ```{r, error = T}
@@ -270,29 +271,19 @@ Inspection of the plots, it seems to show that perhaps the relationship between 
 
 
 ```{r, error = TRUE}
-  gam_fit5_a <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(displacement, 4)+acceleration, data = Auto)
-  summary(gam_fit5_a)
+  gam_fit5 <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(displacement, 4)+acceleration, data = Auto)
+  summary(gam_fit5)
   plot(gam_fit5, se = TRUE)
-  anova(gam_fit5_a, gam_fit4)
+  anova(gam_fit5, gam_fit4)
 ```
 
 From the above ANOVA table : `gam_fit5_a` uses a linear fit for acceleration and `gam_fit4` uses a spline fit for acceleration. The resulting p-value gives 0.3114. This is large enough for us to conclude that the relationship between acceleration and mpg is better modeled as a linear relationship.
 
-The we compare the models of include or exclude `displacment` variable
-
-```{r,error= TRUE}
-  gam_fit5_b <- gam(mpg ~ s(horsepower, 6) + s(weight, 2) +acceleration, data = Auto) # gam_fit5_b model excludes `displacement`
-  summary(gam_fit5_b)
-  plot(gam_fit5_b, se = TRUE)
-  anova(gam_fit5_b, gam_fit5_a)
-```
-
-From the above ANOVA result, we have very small p-value on gam_fit5_b, thus we will keep `displacement` variable in our model. 
-
-Our final model is :
+#Our final model is :
 
 ```{r, error= TRUE}
-
+  gam(mpg ~ s(horsepower, 6) + s(weight, 2) +s(displacement, 4)+acceleration, data = Auto)
+ 
 ```
 
 # 3) Naive Bayes Classifier for Iris data
