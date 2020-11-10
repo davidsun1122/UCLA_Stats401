@@ -340,7 +340,7 @@ The data has three classes of flowers and four input variables.
 library(dplyr)
 # we would call the funtion like: iris_nb(test_case1, train)
 
-iris_nb <- function(test, trainx, trainy){
+iris_nb1 <- function(test, trainx, trainy){
   # the function will accept three arguments:
   # test, which will be the values of the four input variables
   # trainx, which will be the data.frame of the training data x values
@@ -412,7 +412,7 @@ iris_nb <- function(test, trainx, trainy){
     Versicolor = num_ver / denom, 
     Virginica = num_vir / denom), 6)
   
-  return(summary) # what the function outputs
+  return(results) # what the function outputs
 }
 
 ```
@@ -440,11 +440,10 @@ test_case_b <- as.matrix(iris[73, 1:4]) # true class versicolor
 test_case_c <- as.matrix(iris[124, 1:4]) # true class virginica
 
 # class predictions of test cases
-s<-iris_nb(test_case_a, training_x, training_y)
+iris_nb(test_case_a, training_x, training_y)
 iris_nb(test_case_b, training_x, training_y)
 iris_nb(test_case_c, training_x, training_y)
 
-s[1,2,2]
 ```
 
 
