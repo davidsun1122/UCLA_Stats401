@@ -340,14 +340,14 @@ The data has three classes of flowers and four input variables.
 library(dplyr)
 # we would call the funtion like: iris_nb(test_case1, train)
 
-iris_nb1 <- function(test, trainx, trainy){
+iris_nb <- function(test, trainx, trainy){
   # the function will accept three arguments:
   # test, which will be the values of the four input variables
   # trainx, which will be the data.frame of the training data x values
   # trainy, which will be the class labels of the training data
   test <- as.matrix(test) # this converts the test case from a data.frame to a matrix
-  Species<-trainy
-  train <- cbind(data.frame(trainx), Species)
+  
+  train <- cbind(data.frame(trainx), trainy)
   # Using the training data, calculate the mean and standard 
   # deviation for each variable for each class of flower.
   # There will be a total of 24 summary values, that will be used to calculate the 
@@ -361,17 +361,17 @@ iris_nb1 <- function(test, trainx, trainy){
   # ...
   
   # another way uses dplyr. Either method works.
-  summary <- train %>% group_by(Species) %>%
+  summary <- train %>% group_by(trainy) %>%
     summarise(msl = mean(Sepal.Length), ssl = sd(Sepal.Length),
               msw = mean(Sepal.Width), ssw = sd(Sepal.Width),
-              mpl = mean(Petal.Length), spl = sd(Petal.Width),
+              mpl = mean(Petal.Length), spl = sd(Petal.Length),
               mpw = mean(Petal.Width), spw = sd(Petal.Width))
    
   # # Also, calculate the relative frequency of each species in the training data
   # # these will serve as the 'prior' probabilities of each class
-   pr_set <- sum(train$Species=="setosa")/nrow(train)# proportion of class setosa in the training data
-   pr_ver <- sum(train$Species=="versicolor")/nrow(train)
-   pr_vir <- sum(train$Species=="virginica")/nrow(train)
+   pr_set <- sum(train$trainy=="setosa")/nrow(train)# proportion of class setosa in the training data
+   pr_ver <- sum(train$trainy=="versicolor")/nrow(train)
+   pr_vir <- sum(train$trainy=="virginica")/nrow(train)
   # Now that we have the summary statistics, we can calculate the numerator 
   # for each class.
   # This will be the product of the likelihoods of each variable.
@@ -506,43 +506,52 @@ iris_knn <- function(testx, trainx, trainy, k){
   # establish n as the number of rows in the training data
   # create a vector d (of length n) that will contain the distances
   # from our test case x to the different training cases
-  n <- nrow(train)
+  n <- nrow(trainx)
   d <- rep(NA, n)
   for(i in 1:n){
     # for every data point in the training set
     # calculate the distance and store it in d
-    d[i] <- x# insert calculated distance
+    d[i] <- distance(testx,trainx[i,])# insert calculated distance
   }
   
   # attach the d column to the training data labels
   # Sort this resulting table in ascending order
-  dist_table <- data.frame(d, train$Species)
+  dist_table <- data.frame(d, trainy)
   # look at help(order). 
   # Also see: http://adv-r.had.co.nz/Subsetting.html#applications on ordering
   
   # select the top k rows
-  top_k <- ... 
+  top_k <- dist_table[order(dist_table$d),][1:k,2]
   
   # with those top k rows, you can use table() to tabulate a count of labels
   tab <- table(top_k)
   
   # choose the label that has the largest count
-  result <- which() # find which values equal the max value in the table
+  result <- which(tab == max(tab)) # find which values equal the max value in the table
     
   # if results has a length of 1, then that is the label
   # if results has a length greater than 1, go back to the top_k table, and select
   # the nearest row as the label
-  label <- ...
+  if (length(result) ==1)
+    label <- names(result)
+  else
+    label <- top_k[1]
   
   return(label)
 }
+
 ```
 
 
 ```{r, error = TRUE}
-iris_knn(test_case1, train, 5)
-iris_knn(test_case2, train, 5)
-iris_knn(test_case3, train, 5)
+
+iris_knn(test_case_a, training_x,training_y, 5)
+iris_knn(test_case_b, training_x,training_y, 5)
+iris_knn(test_case_c, training_x,training_y, 5)
+
+iris_knn(test_case_a, training_x2, training_y2, 5)
+iris_knn(test_case_b, training_x2, training_y2, 5)
+iris_knn(test_case_c, training_x2, training_y2, 5)
 ```
 
 I hope this exercise helps you better understand the inner workings of a knn algorithm.
