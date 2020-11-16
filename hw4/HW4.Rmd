@@ -44,7 +44,15 @@ We will add bias values before applying the activation function at each of our n
 
 How many parameters are present in our model? List how many are present in: weight matrix 1, bias values for the hidden layer, weight matrix 2, and bias values for output layer.
 
-#### Your answer: 
+#### Your answer:
+
+Weight Matrix 1: 12 parameters
+
+bias values for hidden layer 1 : 3 parameter
+
+weight matrix 2: 3 parameters
+
+bias values for hidden layer 2 : 2 parameter
 
 
 ### Notation
@@ -64,7 +72,19 @@ $B^{(2)}$ are the bias values added before the activation function in the output
 To express the categories correctly, we need to turn the factor labels in species column into vectors of 0s and 1s. For example, an iris of species _setosa_ should be expressed as `1 0 0`. Write some code that will do this. Hint: you can use `as.integer()` to turn a factor into numbers, and then use a bit of creativity to turn those values into vectors of 1s and 0s.
 
 ```{r}
-# your code goes here
+
+vectorize <- function(species){
+  
+  k<-rep (0,3)
+  
+  iris_new<-factor(iris$Species, levels = c(1,2,3), labels =c("setosa","versicolor","virginica"))
+  
+#  j<-as.integer(iris$Species[100])
+  j<-as.integer(species)
+  k[j] <- 1
+  
+  k
+}
 ```
 
 ## Forward Propagation
