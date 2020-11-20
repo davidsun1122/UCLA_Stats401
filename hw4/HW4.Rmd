@@ -2,7 +2,7 @@
 title: "Homework 4 - Neural Networks and Clustering"
 author: "Miles Chen"
 output:
-  pdf_document: default
+  #pdf_document: default
   html_document: default
 ---
 
@@ -102,6 +102,10 @@ In the language of neural networks, this step is called forward propagation. It'
 You can visit https://github.com/stephencwelch/Neural-Networks-Demystified/blob/master/Part%202%20Forward%20Propagation.ipynb to see how the series of functions would be written if we did not use bias values in our calculations.
 
 #### Your answer:
+
+
+$\hat{y}$ = $f(f(XW^{(1)} + JB^{(1)T} W^{(2)}+JB^{(2)T}))$
+
 
 Write your answer here. I recommend typesetting with Latex to express the mathematics. You can learn about writing mathematics in latex at: https://en.wikibooks.org/wiki/LaTeX/Mathematics
 
