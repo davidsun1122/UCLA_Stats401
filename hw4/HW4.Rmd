@@ -116,8 +116,9 @@ $$Z^{(2)} = XW^{(1)}$$
 Express the forward propagation as R code using the training data. For now use random uniform values as temporary starting values for the weights and biases.
 
 ```{r}
-W_1 <- matrix(1,nrow = input_layer_size, nol = hidden_layer_size)
-
+set.seed(1)
+W_1 <- matrix(1,nrow = input_layer_size, ncol = hidden_layer_size)
+W_2 <- matrix(1.nrow = input_layer_size, ncol = hidden_layer_size)
 ```
 
 
