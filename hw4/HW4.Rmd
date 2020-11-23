@@ -433,13 +433,10 @@ library(dplyr)
 
 # get distance by centroids
 distances <- function(point, means,i){
- # point<- dat_df[1,1:2]
-#  means<- centroids[,2:3]
-  dist_to_centroid_A <- sqrt(((point-means[i,])[1])^2+((point-means[i,])[2])^2)
-  #dist_to_centroid_B <- sqrt(((point-means[i,])[1])^2+((point-means[i,])[2])^2)
-  #dist_to_centroid_C <- sqrt(((point-means[i,])[1])^2+((point-means[i,])[2])^2)
-  #return(c(A = dist_to_centroid_A, B = dist_to_centroid_B, C = dist_to_centroid_C))
-  return(dist_to_centroid_A)
+
+  dist_to_centroid <- sqrt(((point-means[i,])[1])^2+((point-means[i,])[2])^2)
+
+  return(dist_to_centroid)
 }
 
 n <-dim(dat)[1]
@@ -472,20 +469,29 @@ while(!converged){
   
   cen_dis<- cbind(cen_dis1,cen_dis2,cen_dis3)
   new_assignments <- apply(cen_dis,1,which.min)
-  
+#plot  
   plot(dat_df[,1:2], col = new_assignments, asp =1, pch = 20)
   points(centroids$x1,centroids$x2, col = centroids$assignments, cex = 2, pch = 13)
   
+#decide converge true or false  
   if(all(assignments == new_assignments)){
     converged <- TRUE
   }
   else{
     assignments<- new_assignments
     }
-  
-  
 }
 
+# rename jkl, create matrix table
+true_groups <- as.character(true_groups)
+x<-rep(0, length(true_groups))
+
+for (i in 1: length(true_groups)){
+  x[i]<-switch(true_groups[i], "j" = 1, "k"=3,"l"=2)
+}
+
+
+table(new_assignments,x)
 ```
 
 
@@ -624,8 +630,69 @@ sig1 <- matrix(c(1,0,0,1), nrow=2)  # three arbitrary covariance matrices
 sig2 <- matrix(c(1,0,0,1), nrow=2)
 sig3 <- matrix(c(1,0,0,1), nrow=2)
 
-## write your code here
+converged = F
 
+l1 <-dmvnorm(dat, mean = mu[1,], sigma = sig1)
+l2 <-dmvnorm(dat, mean = mu[2,], sigma = sig2)
+l3 <-dmvnorm(dat, mean = mu[3,], sigma = sig3)
+
+num1 <- l1*alpha[1]
+num2 <- l2*alpha[2]
+num3 <- l3*alpha[3]
+
+marginal <- num1+ num2 + num3
+
+w <- cbind(num1/marginal,num2/marginal,num3/marginal )
+
+N.k <- as.vector(colSums(w))
+alpha.new <- N.k/N
+
+mu.1 <- (colSums(w[,1] * dat))/N.k[1]
+mu.2 <- (colSums(w[,1] * dat))/N.k[1]
+mu.3 <- (colSums(w[,1] * dat))/N.k[1]
+mu.new<- matrix(c(mu.1,mu.2,mu.3), nrow=3, byrow = T)
+
+a <- matrix(0, nrow=2, ncol=2)
+for(i in 1:1000){
+  b<- w[i,1]*(dat[i,] - mu.new[1,]) %*% t((dat[i,]- mu.new[1,]))
+  a<- a+b
+}
+
+sig1.new <-a/N.k[1]
+
+#sigma for cluster 2
+a <- matrix(0, nrow=2, ncol=2)
+for(i in 1:1000){
+  b<- w[i,2]*(dat[i,] - mu.new[2,]) %*% t((dat[i,]- mu.new[2,]))
+  a<- a+b
+}
+
+sig2.new <-a/N.k[2]
+
+#sigma for cluster 3
+a <- matrix(0, nrow=2, ncol=2)
+for(i in 1:1000){
+  b<- w[i,3]*(dat[i,] - mu.new[3,]) %*% t((dat[i,]- mu.new[3,]))
+  a<- a+b
+}
+
+sig3.new <-a/N.k[3]
+
+if(all(mu == mu.new, sig1 == sig1.new, sig2 == sig2.new, sig3 ==sig3.new)){
+  converged <- T
+}else{
+    alpha = alpha.new
+    mu <-mu.new
+    sig1 <- sig1.new
+    sig2 <-sig2.new
+    sig3<-sig3.new
+}
+
+N.k
+mu
+sig1
+sig2
+sig3
 ```
 
 
