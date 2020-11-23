@@ -429,17 +429,63 @@ plot(dat, col = assignments, asp = 1)  # initial plot
 ```
 
 ```{r}
-# write your code here
-distances <- function(point, means){
-  # write code here
-  # return(c(A = dist_to_centroid_A, B = dist_to_centroid_B, C = dist_to_centroid_C))
+library(dplyr)
+
+# get distance by centroids
+distances <- function(point, means,i){
+ # point<- dat_df[1,1:2]
+#  means<- centroids[,2:3]
+  dist_to_centroid_A <- sqrt(((point-means[i,])[1])^2+((point-means[i,])[2])^2)
+  #dist_to_centroid_B <- sqrt(((point-means[i,])[1])^2+((point-means[i,])[2])^2)
+  #dist_to_centroid_C <- sqrt(((point-means[i,])[1])^2+((point-means[i,])[2])^2)
+  #return(c(A = dist_to_centroid_A, B = dist_to_centroid_B, C = dist_to_centroid_C))
+  return(dist_to_centroid_A)
 }
 
+n <-dim(dat)[1]
+
 converged = FALSE
+
 while(!converged){
-  # write code here...
-  converged <- TRUE
+  par(mfrow = c(1,2))
+  
+  dat_df <- data.frame(dat, assignments)
+  
+#create centroids
+  centroids <- dat_df%>%group_by(assignments) %>%
+    summarise(x1 = mean(X1), x2 = mean(X2))
+  centroids
+  plot(dat_df[,1:2], col = assignments, asp =1, pch = 20)
+  points(centroids$x1,centroids$x2, col = centroids$assignments, cex = 2, pch = 13)
+  
+  
+#find distance among all pts to 3 centroids  
+  cen_dis1<- matrix(0,nrow = n, ncol = 1)
+  cen_dis2<- matrix(0,nrow = n, ncol = 1)
+  cen_dis3<- matrix(0,nrow = n, ncol = 1)
+  
+  for (i in 1:n){
+    cen_dis1[i]<-distances(dat_df[i,1:2],centroids[,2:3],1)
+    cen_dis2[i]<-distances(dat_df[i,1:2],centroids[,2:3],2)
+    cen_dis3[i]<-distances(dat_df[i,1:2],centroids[,2:3],3)
+  }
+  
+  cen_dis<- cbind(cen_dis1,cen_dis2,cen_dis3)
+  new_assignments <- apply(cen_dis,1,which.min)
+  
+  plot(dat_df[,1:2], col = new_assignments, asp =1, pch = 20)
+  points(centroids$x1,centroids$x2, col = centroids$assignments, cex = 2, pch = 13)
+  
+  if(all(assignments == new_assignments)){
+    converged <- TRUE
+  }
+  else{
+    assignments<- new_assignments
+    }
+  
+  
 }
+
 ```
 
 
