@@ -633,9 +633,60 @@ sig3 <- matrix(c(1,0,0,1), nrow=2)
 converged = F
 
 while(!converged){
+  
+#likelihood  
+  l1<- matrix(0,nrow = N ,ncol = 1) 
+  l2<- matrix(0,nrow = N ,ncol = 1) 
+  l3<- matrix(0,nrow = N ,ncol = 1) 
+  
+  for(i in 1: N) {
+    l1[i] <- dmvnorm(dat[i,], mean =mu[1,], sigma = sig1)
+    l2[i] <- dmvnorm(dat[i,], mean =mu[2,], sigma = sig1)
+    l3[i] <- dmvnorm(dat[i,], mean =mu[3,], sigma = sig1)
+  }
+#weight
+  w1<- matrix(0,nrow = N ,ncol = 1) 
+  w2<- matrix(0,nrow = N ,ncol = 1) 
+  w3<- matrix(0,nrow = N ,ncol = 1) 
+  
+  for(i in 1: N) {
+    margin <-  l1[i]*alpha[1] + l2[i]*alpha[2] + l3[i]*alpha[3]
+    
+    w1[i] <- l1[i]* alpha[1]/margin
+    w2[i] <- l2[i]* alpha[2]/margin
+    w3[i] <- l3[i]* alpha[3]/margin
+  }
+  weight_mtx <-matrix(cbind(w1,w2,w3),nrow=N, ncol =3)
+# N_k
+  N_k <- colSums(weight_mtx)
+  
+# alpha k 
+  alpha_k <- N_k/N
+  
+  #M Step
+  
+#mu  
+  mu1 <- colSums(weight_mtx[,1] * dat)/N_k[1]
+  mu2 <- colSums(weight_mtx[,2] * dat)/N_k[2]
+  mu3 <- colSums(weight_mtx[,3] * dat)/N_k[3]
+  
+  mu_mtx <- matrix(cbind(mu1,mu2,mu3),nrow = 3, ncol = N)#?
+  
+#new sigma
+  sig1_k <- matrix(0, nrow = 2, ncol = 2)
+  
+  for(i in 1:N){
+    w_x <- w1[i]*(dat[i,] - mu_mtx[1,]) %*% t((dat[i,] - mu_mtx[1,]))
+    sig1_k <- sig1_k + w_x
+  }
+  
+  sig1_new <- sig1/N_k[1]
+  
+  
+  
+  
   converged = T
 }
-
 
 
 
