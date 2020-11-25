@@ -349,6 +349,7 @@ print(err/30)
 
 How many errors did your network make?
 
+I made 1 error with 96.67% accuracy rate 
 
 ## Using package `nnet`
 
@@ -442,7 +443,7 @@ distances <- function(point, means,i){
 n <-dim(dat)[1]
 
 converged = FALSE
-
+rept <-0
 while(!converged){
   par(mfrow = c(1,2))
   
@@ -476,9 +477,11 @@ while(!converged){
 #decide converge true or false  
   if(all(assignments == new_assignments)){
     converged <- TRUE
+    print(rept)
   }
   else{
     assignments<- new_assignments
+    rept<-rept+1
     }
 }
 
