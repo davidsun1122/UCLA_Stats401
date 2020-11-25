@@ -631,7 +631,7 @@ sig2 <- matrix(c(1,0,0,1), nrow=2)
 sig3 <- matrix(c(1,0,0,1), nrow=2)
 
 converged = F
-
+rept<- 0
 while(!converged){
   
 #likelihood  
@@ -670,9 +670,9 @@ while(!converged){
   mu2 <- colSums(weight_mtx[,2] * dat)/N_k[2]
   mu3 <- colSums(weight_mtx[,3] * dat)/N_k[3]
   
-  mu_mtx <- matrix(cbind(mu1,mu2,mu3),nrow = 3, ncol = N)#?
+  mu_mtx <- matrix(cbind(mu1,mu2,mu3),nrow = 3)#?
   
-#new sigma
+#new sigma 1 2 3
   sig1_k <- matrix(0, nrow = 2, ncol = 2)
   
   for(i in 1:N){
@@ -680,79 +680,119 @@ while(!converged){
     sig1_k <- sig1_k + w_x
   }
   
-  sig1_new <- sig1/N_k[1]
+  sig1_new <- sig1_k/N_k[1]
+  
+  
+  
+  sig2_k <- matrix(0, nrow = 2, ncol = 2)
+  
+  for(i in 1:N){
+    w_y <- w2[i]*(dat[i,] - mu_mtx[2,]) %*% t((dat[i,] - mu_mtx[2,]))
+    sig2_k <- sig2_k + w_y
+  }
+  
+  sig2_new <- sig2_k/N_k[2]
   
   
   
   
-  converged = T
+  sig3_k <- matrix(0, nrow = 2, ncol = 2)
+  
+  for(i in 1:N){
+    w_z <- w3[i]*(dat[i,] - mu_mtx[3,]) %*% t((dat[i,] - mu_mtx[3,]))
+    sig3_k <- sig3_k + w_z
+  }
+  
+  sig3_new <- sig3_k/N_k[2]
+  
+  if(all(mu == mu_mtx, sig1 == sig1_new, sig2 == sig2_new, sig3 == sig1_new)){
+    converged = T
+  }else{
+      rept<-rept +1
+      rept
+      mu<- mu_mtx
+      sig1<- sig1_new
+      sig2 <- sig2_new
+      sig3 <- sig3_new
+      alpha <- alpha_k
+    }
 }
 
-
+###Plot 1
+plot(dat, col = col[em_true_groups], main = "data with true group assignments", asp = 1, cex = 0.5)
+###Plot 2
+group_new_em <- factor(rep(c(1,2,3),N))
+for(i in 1:N){
+  group_new_em[[i]]<-as.factor(which(weight_mtx[i,] == max(weight_mtx[i,])))
+}
+plot(dat, col = group_new_em, main = "data with EM algorithm", asp = 1, cex = 0.5)
+###Plot 3
+result_kmeans <- kmeans(dat,3)
+plot(dat, col = result_kmeans$cluster, main = "data with k-means clustering algorithm", asp = 1, cex = 0.5)
 
 
 #-----
-l1 <-dmvnorm(dat, mean = mu[1,], sigma = sig1)
-l2 <-dmvnorm(dat, mean = mu[2,], sigma = sig2)
-l3 <-dmvnorm(dat, mean = mu[3,], sigma = sig3)
-
-num1 <- l1*alpha[1]
-num2 <- l2*alpha[2]
-num3 <- l3*alpha[3]
-
-marginal <- num1+ num2 + num3
-
-w <- cbind(num1/marginal,num2/marginal,num3/marginal )
-
-N.k <- as.vector(colSums(w))
-alpha.new <- N.k/N
-
-mu.1 <- (colSums(w[,1] * dat))/N.k[1]
-mu.2 <- (colSums(w[,1] * dat))/N.k[1]
-mu.3 <- (colSums(w[,1] * dat))/N.k[1]
-mu.new<- matrix(c(mu.1,mu.2,mu.3), nrow=3, byrow = T)
-
-a <- matrix(0, nrow=2, ncol=2)
-for(i in 1:1000){
-  b<- w[i,1]*(dat[i,] - mu.new[1,]) %*% t((dat[i,]- mu.new[1,]))
-  a<- a+b
-}
-
-sig1.new <-a/N.k[1]
-
-#sigma for cluster 2
-a <- matrix(0, nrow=2, ncol=2)
-for(i in 1:1000){
-  b<- w[i,2]*(dat[i,] - mu.new[2,]) %*% t((dat[i,]- mu.new[2,]))
-  a<- a+b
-}
-
-sig2.new <-a/N.k[2]
-
-#sigma for cluster 3
-a <- matrix(0, nrow=2, ncol=2)
-for(i in 1:1000){
-  b<- w[i,3]*(dat[i,] - mu.new[3,]) %*% t((dat[i,]- mu.new[3,]))
-  a<- a+b
-}
-
-sig3.new <-a/N.k[3]
-
-if(all(mu == mu.new, sig1 == sig1.new, sig2 == sig2.new, sig3 ==sig3.new)){
-  converged <- T
-}else{
-    alpha = alpha.new
-    mu <-mu.new
-    sig1 <- sig1.new
-    sig2 <-sig2.new
-    sig3<-sig3.new
-}
-
-N.k
-mu
-sig1
-sig2
-sig3
+# l1 <-dmvnorm(dat, mean = mu[1,], sigma = sig1)
+# l2 <-dmvnorm(dat, mean = mu[2,], sigma = sig2)
+# l3 <-dmvnorm(dat, mean = mu[3,], sigma = sig3)
+# 
+# num1 <- l1*alpha[1]
+# num2 <- l2*alpha[2]
+# num3 <- l3*alpha[3]
+# 
+# marginal <- num1+ num2 + num3
+# 
+# w <- cbind(num1/marginal,num2/marginal,num3/marginal )
+# 
+# N.k <- as.vector(colSums(w))
+# alpha.new <- N.k/N
+# 
+# mu.1 <- (colSums(w[,1] * dat))/N.k[1]
+# mu.2 <- (colSums(w[,1] * dat))/N.k[1]
+# mu.3 <- (colSums(w[,1] * dat))/N.k[1]
+# mu.new<- matrix(c(mu.1,mu.2,mu.3), nrow=3, byrow = T)
+# 
+# a <- matrix(0, nrow=2, ncol=2)
+# for(i in 1:1000){
+#   b<- w[i,1]*(dat[i,] - mu.new[1,]) %*% t((dat[i,]- mu.new[1,]))
+#   a<- a+b
+# }
+# 
+# sig1.new <-a/N.k[1]
+# 
+# #sigma for cluster 2
+# a <- matrix(0, nrow=2, ncol=2)
+# for(i in 1:1000){
+#   b<- w[i,2]*(dat[i,] - mu.new[2,]) %*% t((dat[i,]- mu.new[2,]))
+#   a<- a+b
+# }
+# 
+# sig2.new <-a/N.k[2]
+# 
+# #sigma for cluster 3
+# a <- matrix(0, nrow=2, ncol=2)
+# for(i in 1:1000){
+#   b<- w[i,3]*(dat[i,] - mu.new[3,]) %*% t((dat[i,]- mu.new[3,]))
+#   a<- a+b
+# }
+# 
+# sig3.new <-a/N.k[3]
+# 
+# if(all(mu == mu.new, sig1 == sig1.new, sig2 == sig2.new, sig3 ==sig3.new)){
+#   converged <- T
+# }else{
+#     alpha = alpha.new
+#     mu <-mu.new
+#     sig1 <- sig1.new
+#     sig2 <-sig2.new
+#     sig3<-sig3.new
+# }
+# 
+# N.k
+# mu
+# sig1
+# sig2
+# sig3
 ```
 
 
